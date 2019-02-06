@@ -1,9 +1,21 @@
 /**
  * harjoittelu app
+ * ---------------
+ * For navigation 
+ * https://reactnavigation.org/docs/en/getting-started.html
  */
 
 import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View, ScrollView, Dimensions} from 'react-native';
+import {
+	Platform, 
+	StyleSheet, 
+	Text, 
+	View, 
+	ScrollView, 
+	Button,
+	TextInput, 
+	Dimensions} from 'react-native';
+import { createStackNavigator, createAppContainer } from "react-navigation";
 
 import BgComponent from './components/BgComponent.js'
 
@@ -21,22 +33,90 @@ const instructions = Platform.select({
     'Double tap R on your keyboard to reload,\n' +
     'Shake or press menu button for dev menu',
 });
+//<Text style={styles.instructions}>{instructions}</Text> 
 
 type Props = {};
-export default class App extends Component<Props> {
+
+//export default class App extends Component<Props> {
+//changed to this after implementing React Navigation
+class Splash extends Component<Props> {
+	constructor(){
+		super();
+		let defaultText = "Write something";
+		this.state = {
+			value:"",
+			placeholder:defaultText,
+			currentStateInfo:"",
+		};
+		//this.handleTextChange = this.handleTextChange.bind(this);
+		this.handleFocus = this.handleFocus.bind(this);
+		this.handleBlur = this.handleBlur.bind(this);
+		this.onSubmit = this.onSubmit.bind(this);		
+	}
+
+	handleTextChange = (writtenText) => {
+	//handleTextChange(writtenText){ //dakdsakladsljksda
+		console.log('state', writtenText);
+		this.setState({
+			value:writtenText
+		});
+	} 
+
+	handleFocus(){
+
+	}
+	handleBlur(){
+
+	}
+
+	onSubmit(){
+		this.setState({
+			currentStateInfo:"Submit pressed, please wait!"
+		});
+	}
+
+
+	render() {
+		let bgImage = require('./assets/vuoristomaisema.jpg');
+		let bgType = "asBackground2";
+		return (
+			<ScrollView>
+				<BgComponent imgSrc={bgImage} bgType={bgType} style={styles.bgImageCover} />
+				<View style={styles.container}>
+					<View style={styles.textOverBg}>
+						<Text style={styles.welcome}>Welcome!</Text>
+						<Text style={styles.instructions}>This is just some Example app</Text>
+						<Button 
+							title="Let's begin"
+		      				onPress={() => this.props.navigation.navigate('Home')}
+		      			/>
+		      			<Text>{this.state.currentStateInfo}</Text>
+		      			<Text>{this.state.value}</Text>
+		      			<TextInput
+		      				placeholder={this.state.placeholder}
+		      				defaultValue={this.state.value}
+		      				onChangeText={this.handleTextChange}
+		      				onFocus={this.handleFocus}
+		      				onBlur={this.handleBlur}
+		      			/>
+		      			<Button 
+							title="Submit"
+		      				onPress={this.onSubmit}  
+		      			/>
+					</View>
+				</View>		
+			</ScrollView> 
+		);
+	}
+}
+
+class Home extends Component<Props> {
   render() {
-  	let bgImage = require('./assets/vuoristomaisema.jpg');
-  	let bgType = "asBackground2";
     return (
 		<ScrollView>
-			<BgComponent imgSrc={bgImage} bgType={bgType} style={styles.bgImageCover} />
 			<View style={styles.container}>
 				<View style={styles.textOverBg}>
-					<Text style={styles.welcome}>Jee!</Text>
-					<Text style={styles.instructions}>To get started, edit App.js</Text>
-					<Text style={styles.instructions}>To get started, edit App.js</Text>
-					<Text style={styles.instructions}>To get started, edit App.js</Text>
-					<Text style={styles.instructions}>{instructions}</Text>
+					<Text style={styles.welcome}>Jee2!</Text>
 				</View>
 			</View>		
 		</ScrollView>
@@ -70,3 +150,23 @@ const styles = StyleSheet.create({
 		color: '#333333',
 	},
 }); 
+
+
+
+const RootStack = createStackNavigator(
+  {
+    Splash: Splash,
+    Home: Home,
+  },
+  {
+    initialRouteName: 'Splash',
+  }
+); 
+
+const AppContainer = createAppContainer(RootStack);
+
+export default class App extends Component<Props> {
+  render() {
+    return <AppContainer />;
+  }
+}
