@@ -1,5 +1,11 @@
 //MoveableButton.js
 
+/*
+* Usage:
+* import MoveableButton from './someFolder/MoveableButton.js';
+* <MoveableButton /> 
+*/
+
 import React, { Component } from 'react';
 
 import {
@@ -47,6 +53,8 @@ class MoveableButton extends Component {
 			windowWidth:width,
 		}; 
 	}
+
+	//this.state.moveablePlus["size"]
 
 	//the responder system bubbles up from the deepest component, 
 	//a parent View wants to prevent the child from becoming responder on a touch move
