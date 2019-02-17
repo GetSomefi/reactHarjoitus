@@ -14,10 +14,17 @@ import {
 	ScrollView, 
 	Button,
 	TextInput, 
-	Dimensions} from 'react-native';
+	Dimensions,
+	Animated,
+	Easing,
+	ListView
+} from 'react-native';
 import { createStackNavigator, createAppContainer } from "react-navigation";
 
-import BgComponent from './components/BgComponent.js'
+//if component isn't loading run react-native start --reset-cache
+import BgComponent from './components/BgComponent.js';
+import MoveableButton from './components/MoveableButton.js';
+import MoveableView from './components/MoveableView.js'; 
 
 var bgColors = { "Default": "#81b71a",
                     "Blue": "#00B1E1",
@@ -26,6 +33,48 @@ var bgColors = { "Default": "#81b71a",
                     "Red": "#E9573F",
                     "Yellow": "#F6BB42",
 };
+
+class FadeInView extends React.Component {
+  state = {
+    fadeAnim: new Animated.Value(0),  // Initial value for opacity: 0
+    translateYValue: new Animated.Value(100),
+  }
+
+  componentDidMount() {
+    Animated.parallel([
+	    Animated.timing(                  // Animate over time
+	      this.state.fadeAnim,            // The animated value to drive
+	      {
+	        toValue: 1,                   // Animate to opacity: 1 (opaque)
+	        duration: 1000,              // Make it take a while
+	      }
+	    ),
+	    Animated.timing(                  // Animate over time
+	      this.state.translateYValue,            // The animated value to drive
+	      {
+	        toValue: 0,                   // Animate to opacity: 1 (opaque)
+	        duration: 1000,              // Make it take a while
+	      }
+	    ),
+    ]).start();                        
+  }
+
+  render() {
+    let { fadeAnim,translateYValue } = this.state;
+
+    return (
+      <Animated.View                 // Special animatable View
+        style={{
+          ...this.props.style,
+          opacity: fadeAnim,         // Bind opacity to animated value
+          transform: [{ translateY: translateYValue }],
+        }}
+      >
+        {this.props.children}
+      </Animated.View>
+    );
+  }
+}
 
 const instructions = Platform.select({
   ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
@@ -48,10 +97,15 @@ class Splash extends Component<Props> {
 			placeholder:defaultText,
 			currentStateInfo:"",
 		};
+
+		/*
+		these are obsolete when using fat arrow function
+		something = () => {}
+		*/
 		//this.handleTextChange = this.handleTextChange.bind(this);
-		this.handleFocus = this.handleFocus.bind(this);
-		this.handleBlur = this.handleBlur.bind(this);
-		this.onSubmit = this.onSubmit.bind(this);		
+		//this.handleFocus = this.handleFocus.bind(this);
+		//this.handleBlur = this.handleBlur.bind(this);
+		//this.onSubmit = this.onSubmit.bind(this);		
 	}
 
 	handleTextChange = (writtenText) => {
@@ -62,14 +116,14 @@ class Splash extends Component<Props> {
 		});
 	} 
 
-	handleFocus(){
+	handleFocus = () => {
 
 	}
-	handleBlur(){
+	handleBlur= () => {
 
 	}
 
-	onSubmit(){
+	onSubmit = (writtenText) => {
 		this.setState({
 			currentStateInfo:"Submit pressed, please wait!"
 		});
@@ -90,6 +144,10 @@ class Splash extends Component<Props> {
 							title="Let's begin"
 		      				onPress={() => this.props.navigation.navigate('Home')}
 		      			/>
+		      			<Button 
+							title="Stacked view test"
+		      				onPress={() => this.props.navigation.navigate('StackedView')}
+		      			/>
 		      			<Text>{this.state.currentStateInfo}</Text>
 		      			<Text>{this.state.value}</Text>
 		      			<TextInput
@@ -102,9 +160,14 @@ class Splash extends Component<Props> {
 		      			<Button 
 							title="Submit"
 		      				onPress={this.onSubmit}  
-		      			/>
-					</View>
-				</View>		
+		      			/> 
+					</View> 
+					<View style={{flex: 1, backgroundColor: 'steelblue'}} /> 
+					<FadeInView style={{flex: 1, flexDirection: 'row',backgroundColor: '#FFF'}}>
+  						<Text style={{width:"50%",fontSize: 28, textAlign: 'center'}}>1</Text>
+  						<Text style={{width:"50%",fontSize: 28, textAlign: 'center'}}>2</Text>
+  					</FadeInView>
+				</View>
 			</ScrollView> 
 		);
 	}
@@ -124,22 +187,128 @@ class Home extends Component<Props> {
   }
 }
 
+class StackedView extends Component<Props> {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+        	...this.props,
+			movePos:0,
+			activeView:true,
+			activeId:4,
+			toBeActiveId:0,
+			directionY:"up",
+		};
+    } 
+
+	testing = () => {
+		console.log('active', this.state.activeId); 
+	}
+
+	windowLoop = () => {
+		let allWindows = [];
+		let windowAmount = 5;
+		for (var i=0; i < windowAmount; i++) {
+			let isActive = "hidden";
+			if(i == this.state.activeId-1){
+				isActive = "active";
+			}
+
+			//console.log('act ', isActive); 
+			let ar = {
+				key:i,
+				mvStatus:isActive
+			}
+	        allWindows.push(ar);
+		}	
+		
+		return allWindows;
+	}
+
+	//https://stackoverflow.com/questions/41638032/how-to-pass-data-between-child-and-parent-in-react-native
+	parentMethod = (data) => {
+		//parentMethod(data) {
+		console.log('active', data);
+		this.setState({
+			toBeActiveId:data.toBeActiveId,
+			directionY:data.direction,
+		});
+	}
+
+	render() {
+	let bgImage = require('./assets/bg1_japan.png');
+	let bgType = "asBackground2";
+	let windowStack = this.windowLoop();
+
+	//{this.windowLoop} <MoveableView
+	return (
+		<View style={{flex:1}}>
+			<BgComponent imgSrc={bgImage} bgType={bgType} style={styles.bgImageCover} />
+			<View style={styles.stackedContainer}>
+				<View style={styles.stackedViewsHolder}>	
+					{this.windowLoop().map((row) => {
+        				return <MoveableView
+						key={row.key} //this can't be accessed inside the component
+						id={row.key}  //so it needs id that can be accessed
+						toBeActiveId={this.state.toBeActiveId}
+						directionY={this.state.directionY}
+						mvStatus={row.mvStatus}
+						onRef={ref => (this.parentReference = ref)}
+						parentReference = {this.parentMethod}
+						/> 				
+    				})}
+				</View> 
+			</View>
+
+			<MoveableButton /> 
+
+
+			<Button 
+				title="Check current"
+		      	onPress={this.testing}
+		    />
+		</View>
+	);
+	}
+}
+
 const {height, width} = Dimensions.get('window');
 const styles = StyleSheet.create({
+	//StackedView
+	stackedContainer:{
+		flex:1,
+		height:height-80,
+		backgroundColor: '#F00',
+		alignItems:"center",
+	},
+	stackedViewsHolder:{
+		alignItems:"center",
+		backgroundColor:"#666",
+		width:"80%",
+		justifyContent:'space-evenly',
+		flex: 1,
+        flexDirection: 'column',
+        margin:30,
+	},
+	height1000:{
+		height:1000
+	},
+	//regular
 	container: {
 		flex: 1,
+		height:height-80,
 		backgroundColor: '#c5ff9063',
 	},
 	textOverBg: {
-		backgroundColor: '#ff90a463',
-		justifyContent: 'center',
+		flex: 6,
+		backgroundColor: '#ff90a463', 
 		alignItems: 'center',
-    	height: height,
 	},
 	welcome: {
 		fontSize: 20,
 		textAlign: 'center',
 		margin: 10,
+		color:"#FFF"
 	},
 	instructions: {
 		textAlign: 'center',
@@ -157,9 +326,11 @@ const RootStack = createStackNavigator(
   {
     Splash: Splash,
     Home: Home,
+    StackedView: StackedView,
   },
   {
-    initialRouteName: 'Splash',
+    //initialRouteName: 'Splash',
+    initialRouteName: 'StackedView',
   }
 ); 
 
