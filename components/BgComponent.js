@@ -1,3 +1,5 @@
+//BgComponent.js
+
 import React, { Component } from 'react';
 
 import {
@@ -16,9 +18,9 @@ class BgComponent extends Component {
        
   }
   render() {
-    console.log("dsa2", this.props.imgSrc);
-    console.log(this.props);
-    console.dir(this.props);
+    //console.log("dsa2", this.props.imgSrc);
+    //console.log(this.props);
+    //console.dir(this.props);
 
     if(this.props.bgType == "asBackground"){
       return (

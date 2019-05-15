@@ -195,7 +195,7 @@ class StackedView extends Component<Props> {
         	...this.props,
 			movePos:0,
 			activeView:true,
-			activeId:4,
+			activeId:1,
 			toBeActiveId:0,
 			directionY:"up",
 		};
@@ -209,15 +209,8 @@ class StackedView extends Component<Props> {
 		let allWindows = [];
 		let windowAmount = 5;
 		for (var i=0; i < windowAmount; i++) {
-			let isActive = "hidden";
-			if(i == this.state.activeId-1){
-				isActive = "active";
-			}
-
-			//console.log('act ', isActive); 
 			let ar = {
 				key:i,
-				mvStatus:isActive
 			}
 	        allWindows.push(ar);
 		}	
@@ -228,10 +221,12 @@ class StackedView extends Component<Props> {
 	//https://stackoverflow.com/questions/41638032/how-to-pass-data-between-child-and-parent-in-react-native
 	parentMethod = (data) => {
 		//parentMethod(data) {
-		console.log('active', data);
+		//console.log('active', data);
 		this.setState({
 			toBeActiveId:data.toBeActiveId,
 			directionY:data.direction,
+			totalMove:data.totalMove,
+			activeId:data.activeId
 		});
 	}
 
@@ -252,7 +247,8 @@ class StackedView extends Component<Props> {
 						id={row.key}  //so it needs id that can be accessed
 						toBeActiveId={this.state.toBeActiveId}
 						directionY={this.state.directionY}
-						mvStatus={row.mvStatus}
+						totalMove={this.state.totalMove}
+						activeId={this.state.activeId}
 						onRef={ref => (this.parentReference = ref)}
 						parentReference = {this.parentMethod}
 						/> 				

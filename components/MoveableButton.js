@@ -169,7 +169,7 @@ class MoveableButton extends Component {
 		}}>
 		<Text style={{color:"#FFF",textAlign:"center", lineHeight:40}}>
 			+
-		</Text>
+		</Text>	
 		<View style={{width:80, backgroundColor:"#000",position:"absolute",left:-100}}>
 			<Text style={{color:"#FFF", padding:4, fontSize:10}}>
 				Start Y: {this.state.myStartPosPageY}
